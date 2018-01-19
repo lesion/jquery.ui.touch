@@ -202,6 +202,17 @@
 	
 	var touchAvailable = ("ontouchend" in document);
 
+	$.fn.removeTouch = function () {
+		if (touchAvailable) {
+			this.each(function (i, el) {
+				el.removeEventListener("touchstart", iPadTouchHandler, false);
+				el.removeEventListener("touchmove", iPadTouchHandler, false);
+				el.removeEventListener("touchend", iPadTouchHandler, false);
+				el.removeEventListener("touchcancel", iPadTouchHandler, false);
+			});
+		}
+	};
+
 	$.fn.addTouch = function() {
 	    if (touchAvailable) {
             this.each(function(i,el){
