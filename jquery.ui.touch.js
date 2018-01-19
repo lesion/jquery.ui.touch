@@ -23,7 +23,7 @@
         factory(jQuery);
     }
 }(function ($) {
-	
+	var tapStartPoint = [];
 	var lastTap = null;				// Holds last tapped element (so we can compare for double tap)
 	var tapValid = false;			// Are we still in the .6 second window where a double tap can occur
 	var tapTimeout = null;			// The timeout reference
@@ -60,19 +60,19 @@
 		var first = rightClickEvent,
 			simulatedEvent = document.createEvent("MouseEvent");
 		simulatedEvent.initMouseEvent("mouseup", true, true, window, 1, first.screenX, first.screenY, first.clientX, first.clientY,
-				false, false, false, false, 0, null);
+			false, false, false, false, 0, null);
 		first.target.dispatchEvent(simulatedEvent);
 
 		// Emulate a right click
 		simulatedEvent = document.createEvent("MouseEvent");
 		simulatedEvent.initMouseEvent("mousedown", true, true, window, 1, first.screenX, first.screenY, first.clientX, first.clientY,
-				false, false, false, false, 2, null);
+			false, false, false, false, 2, null);
 		first.target.dispatchEvent(simulatedEvent);
 
 		// Show a context menu
 		simulatedEvent = document.createEvent("MouseEvent");
 		simulatedEvent.initMouseEvent("contextmenu", true, true, window, 1, first.screenX + 50, first.screenY + 5, first.clientX + 50, first.clientY + 5,
-	                                  false, false, false, false, 2, null);
+			false, false, false, false, 2, null);
 		first.target.dispatchEvent(simulatedEvent);
 
 		// Note: I don't mouse up the right click here however feel free to add if required
@@ -146,6 +146,8 @@
 
 		switch (event.type) {
 			case "touchstart":
+				tapStartPoint[0] = event.changedTouches[0].clientX;
+				tapStartPoint[1] = event.changedTouches[0].clientY;
 				if ($(event.changedTouches[0].target).is("select")) {
 					return;
 				}
@@ -155,7 +157,12 @@
 				break;
 
 			case "touchmove":
-				cancelHold();
+				var delta = event.changedTouches[0].clientX - tapStartPoint[0] + event.changedTouches[0].clientY - tapStartPoint[1];
+
+				// 15 is sensibility
+				if (delta > 15) {
+					cancelHold();
+				}
 				type = "mousemove";
 				event.preventDefault();
 				break;
@@ -179,7 +186,7 @@
 			simulatedEvent = document.createEvent("MouseEvent");
 
 		simulatedEvent.initMouseEvent(type, true, true, window, 1, first.screenX, first.screenY, first.clientX, first.clientY,
-	                            false, false, false, false, button, null);
+			false, false, false, false, button, null);
 
 		first.target.dispatchEvent(simulatedEvent);
 
